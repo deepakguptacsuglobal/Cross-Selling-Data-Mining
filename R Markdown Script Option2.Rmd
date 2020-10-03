@@ -1,0 +1,75 @@
+---
+title: "MIS 510 Portfolio Project Option 2"
+author: "Deepak Gupta"
+date: "5/31/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r}
+
+# load library arules to convert the binary incidence matrix into a transactions database
+
+setwd("D:/CSUGLOBAL/MIS510 Data Mining and Visualization/Module 8")
+
+#load the packages for association rules and R sample datasets
+
+library(arules) #arules: Visualizing Association Rules
+
+library(arulesViz) #arulesViz: Visualizing Association Rules
+
+crossSell.df <- read.csv("CatalogCrossSell.csv", nrows = 4998)
+
+crossSell.df <- crossSell.df[,2:10] # Removing customer id from dataset, otherwise will be taken as an "item"
+
+head(crossSell.df)
+
+tail(crossSell.df)
+
+dim(crossSell.df)
+
+
+#View individual item names
+t(t(names(crossSell.df)))
+
+#Convert to matrix
+crossSelldata.df <- as.matrix(crossSell.df)
+
+#Analyzing Dataset with bar plot to view distribution of sales
+barplot(crossSelldata.df, main = "Individual Item Sales")
+
+#convert the binary incidence matrix into a transactions database
+crossSelltrans.df <- as(crossSelldata.df, "transactions")
+
+inspect(head(crossSelltrans.df))
+
+#Create Association Rules by running apriori(), with the minimum support as 0.01, minimum confidence as 0.5, and target as rules in arguments.
+rules <- apriori(crossSelltrans.df, parameter = list(supp = 0.01, conf = 0.5, target = "rules"))
+
+# inspect the first 20 rules, sorted by their lift
+inspect(head(sort(rules, by = "lift"), n = 40))
+
+#bivariate relationship Scatterplot of all rules
+plot(rules, jitter = 0)
+
+#Limit rules those with lift above 2.8
+subrules <- subset(rules, lift > 2.8)
+
+inspect(sort(subrules, by = "lift"))
+
+#Matrix of top 20 Rules
+plot(subrules[1:20], method = "matrix", measure = "lift")
+
+#Graph of top 20 rules
+plot(subrules[1:20], method = "graph", measure = "lift")
+
+#Scatterplot of subrules
+plot(subrules, jitter = 0)
+
+
+
+```
